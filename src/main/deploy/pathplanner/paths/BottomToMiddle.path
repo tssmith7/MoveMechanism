@@ -1,0 +1,76 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.473827650358003,
+        "y": 4.095403506122328
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.292103199393014,
+        "y": 4.559091403897094
+      },
+      "isLocked": false,
+      "linkedName": "BottomPickUp"
+    },
+    {
+      "anchor": {
+        "x": 2.3351571027466376,
+        "y": 5.55593454044051
+      },
+      "prevControl": {
+        "x": 1.5493573329488999,
+        "y": 5.583800717150984
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "MiddlePickUp"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "Pick Up",
+      "waypointRelativePos": 0.0,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "pickUpNote"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 4.5,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": -45.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

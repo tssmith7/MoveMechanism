@@ -1,0 +1,73 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7543128599770712,
+      "y": 6.757878020260545
+    },
+    "rotation": 60.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteTargeting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "StartAmpToTop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteTargeting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TopToCenter1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center1ToShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteTargeting"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ShootToCenter2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center2ToShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNoteTargeting"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "Amp Side",
+  "choreoAuto": false
+}
