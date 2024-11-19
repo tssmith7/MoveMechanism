@@ -30,7 +30,7 @@ Robot::Robot() {
 
   target = redTarget;
   robotPose = {14_m, 4.5_m, 170_deg};
-  DataLogger::GetInstance().SendNT( "Robot/Pose", robotPose );
+  DataLogger::Log( "Robot/Pose", robotPose );
 
 
   frc::SmartDashboard::PutData( &field );
@@ -91,15 +91,15 @@ void Robot::RobotPeriodic() {
   
   ++count;
   
-  DataLogger::GetInstance().SendNT( "Count", count );
+  DataLogger::Log( "Count", count );
 
   if( count < 200 ) {
-    DataLogger::GetInstance().SendNT( "Robot/Pose", robotPose );
+    DataLogger::Log( "Robot/Pose", robotPose );
   } else {
     if( count % 300 == 0 ) {
-      DataLogger::GetInstance().SendNT( "Robot/Pose", std::span<double>{} );
+      DataLogger::Log( "Robot/Pose", std::span<double>{} );
     } else if( count % 50 == 0 ) {
-      DataLogger::GetInstance().SendNT( "Robot/Pose", robotPose );
+      DataLogger::Log( "Robot/Pose", robotPose );
     }
 
     if( count % 50 == 0 ) {

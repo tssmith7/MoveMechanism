@@ -19,6 +19,8 @@ public :
     void ProcessInputs( std::string key );
 
     units::degree_t armPosition = 0_deg;
+    std::vector<units::degree_t> armPositionHistory = {0_deg, 0_deg};
+    std::vector<double> armPositionHistoryDbl = {0, 0};
     units::degree_t armGoal = 0_deg;
     units::revolutions_per_minute_t armVelocity = 0_rpm;
     units::volt_t armAppliedVolts = 0_V;

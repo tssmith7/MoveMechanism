@@ -6,6 +6,8 @@
 #include "motor/SimMotorIO.h"
 #include "subsystems/ExampleIO.h"
 
+#include <frc/Timer.h>
+
 class ExampleIOSim : public ExampleIO {
 public:
     virtual void UpdateInputs( ExampleSubsysInputs &inputs );
@@ -31,6 +33,16 @@ void ExampleIOSim::UpdateInputs( ExampleSubsysInputs &inputs ) {
 
     MotorIO<units::degrees>::Inputs inp_deg;
     inp_deg = m_armMotor.GetInputs();
+    inputs.armPositionHistory[1] = inputs.armPosition;
+    inputs.armPositionHistory[0] = inp_deg.position;
+
+    if( frc::Timer::GetFPGATimestamp() > 10_s ) {
+        inputs.armPositionHistoryDbl = {};
+    } else {
+        inputs.armPositionHistoryDbl[1] = inputs.armPosition.value();
+        inputs.armPositionHistoryDbl[0] = inp_deg.position.value();
+    }
+    
     inputs.armPosition = inp_deg.position;
     inputs.armVelocity = inp_deg.velocity;
     inputs.armAppliedVolts = inp_deg.inputVoltage;

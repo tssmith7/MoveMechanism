@@ -5,6 +5,9 @@
 
 #include <span>
 #include <map>
+#include <units/base.h>
+#include <units/math.h>
+#include <wpi/array.h>
 
 #include <wpi/DataLog.h>
 #include <frc/DataLogManager.h>
@@ -13,59 +16,100 @@
 #include <networktables/GenericEntry.h>
 
 #include <frc/geometry/Pose2d.h>
+#include <frc/kinematics/SwerveModuleState.h>
+
+#define AUTOLOG(key,v) DataLogger::Log( key + "/" + #v, v );
 
 class DataLogger {
-  private:
-      // This class is a singleton.
+private:
+    // This class is a singleton.
     static DataLogger *singleton;
 
-      // Constructor is private
+    // Constructor is private
     DataLogger() {}
-  public:
+    static DataLogger& GetInstance();
 
-      // delete copy constructor
+public:
+
+    // delete copy constructor
     DataLogger(const DataLogger& obj) = delete; 
 
-    static DataLogger& GetInstance() {
-            // If there is no instance of class
-            // then we can create an instance.
-      if (singleton == nullptr)  {
-        singleton = new DataLogger();
-        singleton->log = &frc::DataLogManager::GetLog();
-        singleton->nt_inst = nt::NetworkTableInstance::GetDefault();
-      }
-            
-      return *singleton;
-    }
+        // Base Log() functions that other Log() functions call.
+    static void Log( const std::string& s, double val, bool alsoNT=false );
+    static void Log( const std::string& s, std::span<const double> a, bool alsoNT=false );
+    static void Log( const std::string& s, int val, bool alsoNT=false );
+    static void Log( const std::string& s, int64_t val, bool alsoNT=false );
+    static void Log( const std::string& s, std::span<const int64_t> a, bool alsoNT=false );
+    static void Log( const std::string& s, bool val, bool alsoNT=false );
+    static void Log( const std::string& s, std::span<const bool> a, bool alsoNT=false );
+    static void Log( const std::string& s, const std::string& val, bool alsoNT=false );
 
-    void Send( std::string_view s, double val );
-    void Send( std::string_view s, std::span<const double> a );
-    void Send( std::string_view s, std::string_view val );
-    void Send( std::string_view s, int val );
-    void Send( std::string_view s, bool val );
-    void Send( std::string_view s, frc::Pose2d p );
+        // Derived type Log() functions
+        // These call the Base Log() functions above
+    static void Log( const std::string& s, const frc::Pose2d& p, bool alsoNT=false );
+    static void Log( const std::string &s, const wpi::array<frc::SwerveModuleState, 4U> &sms, bool alsoNT=false );
 
-    void SendNT( std::string s, double val );
-    void SendNT( std::string s, std::span<const double> a );
-    void SendNT( std::string s, frc::Pose2d p );
+        // A units library type.
+    template <class UnitType>
+    requires units::traits::is_unit_t<UnitType>::value
+    static void Log( const std::string &s, const UnitType& val, bool alsoNT=false ) noexcept;
 
-    void Log(  std::string s );
+        // A vector of units library type.
+    template <class UnitType>
+    requires units::traits::is_unit_t<UnitType>::value
+    static void Log( const std::string &s, const std::vector<UnitType>& vec, bool alsoNT=false ) noexcept;
 
-    void LogMetadata( void );
+        // A vector. Must be specialized
+    template<class T>
+    static void Log( const std::string &s, const std::vector<T>& vec, bool alsoNT=false );
 
-  private:
+    static void Log( const std::string& s );
+
+    static void LogMetadata( void );
+
+private:
+    void Send( const std::string& s, double val );
+    void Send( const std::string& s, std::span<const double> a );
+    void Send( const std::string& s, int64_t val );
+    void Send( const std::string& s, std::span<const int64_t> a );
+    void Send( const std::string& s, bool val );
+    void Send( const std::string& s, std::span<const bool> a );
+    void Send( const std::string& s, const std::string& val );
+
+    void SendNT( const std::string& s, double val );
+    void SendNT( const std::string& s, std::span<const double> a );
+    void SendNT( const std::string& s, int64_t val );
+    void SendNT( const std::string& s, std::span<const int64_t> a );
+    void SendNT( const std::string& s, bool val );
+    void SendNT( const std::string& s, std::span<const bool> a );
+    void SendNT( const std::string& s, const std::string& val );
+
     wpi::log::DataLog *log;
-    nt::NetworkTableInstance nt_inst;
+    std::shared_ptr<nt::NetworkTable> nt_table;
     std::map<std::string, nt::GenericPublisher> nt_map;
+    bool isFMSAttached;
 
     void SendMetadata( std::string_view s, std::string_view val );
-
 };
 
 class LoggedInputs {
 public:
-  virtual void ProcessInputs( std::string key ) =0;
+    virtual void ProcessInputs( std::string key ) =0;
 };
 
-#define LOG_VARIABLE(key,v) DataLogger::GetInstance().SendNT( key + "/" + #v, v );
-#define LOG_UNIT(key,v) DataLogger::GetInstance().SendNT( key + "/" + #v + "(" + units::abbreviation(v) + ")", v.to<double>() );
+template <class UnitType>
+requires units::traits::is_unit_t<UnitType>::value
+void DataLogger::Log( const std::string &s, const UnitType& val, bool alsoNT ) noexcept {
+    DataLogger::Log( s + "(" + units::abbreviation(val) + ")", val.to<double>(), alsoNT );
+}
+
+template <class UnitType>
+requires units::traits::is_unit_t<UnitType>::value
+void  DataLogger::Log( const std::string &s, const std::vector<UnitType>& vec, bool alsoNT ) noexcept {
+    static std::vector<double> a{256};
+    a.clear();
+    for( size_t i=0; i<vec.size(); ++i ) {
+        a.push_back(vec[i].value());
+    }
+    DataLogger::Log( s + "(" + units::abbreviation(vec[0]) + ")", std::span<const double>( a ), alsoNT );
+}
