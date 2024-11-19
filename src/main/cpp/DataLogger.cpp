@@ -39,7 +39,7 @@ DataLogger& DataLogger::GetInstance() {
         singleton = new DataLogger();
         singleton->log = &frc::DataLogManager::GetLog();
         singleton->nt_table = nt::NetworkTableInstance::GetDefault().GetTable("");
-        singleton->isFMSAttached = true || frc::DriverStation::IsFMSAttached();
+        singleton->isFMSAttached = frc::DriverStation::IsFMSAttached();
     }
         
     return *singleton;
@@ -77,10 +77,6 @@ void DataLogger::Log( const std::string &s, const wpi::array<frc::SwerveModuleSt
     }
 
     Log( s, std::span{a}, alsoNT );
-}
-
-template<> void DataLogger::Log( const std::string &s, const std::vector<double>& vec, bool alsoNT ) {
-    GetInstance().Log( s, std::span<const double>( vec ) );
 }
 
 /**

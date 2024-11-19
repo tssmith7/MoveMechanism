@@ -18,6 +18,18 @@
 #include <frc/geometry/Pose2d.h>
 #include <frc/kinematics/SwerveModuleState.h>
 
+/*
+ *  AUTOLOG macro can log the following:
+ *      intrinsic data types, 
+ *      vectors of intrinsic data types, 
+ *      unit types,
+ *      vectors of unit types,
+ *      std::optional wrapped types
+ * 
+ *  It will add the units abbreviation to the Log name for unit types.  It can also log Pose2d() and the array of
+ *  SwerveModuleState objects returned from the kinematics.ToSwerveModuleStates() function.
+ *  More types can be easily added.
+ */
 #define AUTOLOG(key,v) DataLogger::Log( key + "/" + #v, v );
 
 class DataLogger {
@@ -45,7 +57,7 @@ public:
     static void Log( const std::string& s, const std::string& val, bool alsoNT=false );
 
         // Derived type Log() functions
-        // These call the Base Log() functions above
+        // These call the Log() function above taking a std::span<const double>
     static void Log( const std::string& s, const frc::Pose2d& p, bool alsoNT=false );
     static void Log( const std::string &s, const wpi::array<frc::SwerveModuleState, 4U> &sms, bool alsoNT=false );
 
@@ -59,9 +71,9 @@ public:
     requires units::traits::is_unit_t<UnitType>::value
     static void Log( const std::string &s, const std::vector<UnitType>& vec, bool alsoNT=false ) noexcept;
 
-        // A vector. Must be specialized
+        // A std::optional wrapped type.
     template<class T>
-    static void Log( const std::string &s, const std::vector<T>& vec, bool alsoNT=false );
+    static void Log( const std::string &s, const std::optional<T>& opt, bool alsoNT=false );
 
     static void Log( const std::string& s );
 
@@ -105,11 +117,18 @@ void DataLogger::Log( const std::string &s, const UnitType& val, bool alsoNT ) n
 
 template <class UnitType>
 requires units::traits::is_unit_t<UnitType>::value
-void  DataLogger::Log( const std::string &s, const std::vector<UnitType>& vec, bool alsoNT ) noexcept {
+void DataLogger::Log( const std::string &s, const std::vector<UnitType>& vec, bool alsoNT ) noexcept {
     static std::vector<double> a{256};
     a.clear();
     for( size_t i=0; i<vec.size(); ++i ) {
         a.push_back(vec[i].value());
     }
     DataLogger::Log( s + "(" + units::abbreviation(vec[0]) + ")", std::span<const double>( a ), alsoNT );
+}
+
+template<class T>
+void DataLogger::Log( const std::string &s, const std::optional<T>& opt, bool alsoNT ) {
+    if( opt.has_value() ) {
+        DataLogger::Log( s, opt.value(), alsoNT );
+    }
 }
