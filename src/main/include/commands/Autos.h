@@ -13,12 +13,14 @@
 
 #include "LoggedCommand.h"
 #include "subsystems/ExampleSubsystem.h"
+#include "subsystems/Drive.h"
+#include "subsystems/Intake.h"
 
 namespace autos {
 /**
  * Example static factory for an autonomous command.
  */
-frc2::CommandPtr ExampleAuto(ExampleSubsystem* subsystem);
+frc2::CommandPtr ShootNote(Intake *intake, Drive *d);
 
 frc2::CommandPtr StateCommand();
 frc2::CommandPtr StateCommandSubsys(ExampleSubsystem* subsystem);

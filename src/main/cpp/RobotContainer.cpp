@@ -15,7 +15,7 @@
 
 #include "commands/Autos.h"
 #include "commands/MoveMechanism.h"
-#include "commands/SeqMoveMech.h"
+#include "commands/NoteViz.h"
 
 RobotContainer::RobotContainer() {
   // Initialize all of your commands and subsystems here
@@ -47,25 +47,37 @@ RobotContainer::RobotContainer() {
  }
 
 void RobotContainer::ConfigureBindings() {
-  // joystick.Button(1).OnTrue( frc2::cmd::Defer( autos::StateCommand, {&m_subsystem} ) ); 
-  // joystick.Button(1).OnTrue( dstop.DelayCommand() ); 
+  m_drive.SetDefaultCommand( 
+    m_drive.ArcadeDriveCmd( 
+      [this] { return controller.GetLeftX(); },
+      [this] { return controller.GetLeftY(); },
+      [this] { return controller.GetRightX(); }
+    )
+  );
 
-  // // joystick.Button(2).OnTrue( frc2::cmd::Sequence( dstop.DelayCommand2(), autos::StateCommand() ) ); 
-  // joystick.Button(2).OnTrue( dstop.DelayCommand2() ); 
+  m_intake.HasNoteTrigger().OnTrue( 
+      frc2::cmd::Sequence(
+        frc2::cmd::RunOnce( [this] { controller.SetRumble( frc::GenericHID::kBothRumble, 0.9 ); } ),
+        frc2::cmd::Wait( 0.5_s ),
+        frc2::cmd::RunOnce( [this] { controller.SetRumble( frc::GenericHID::kBothRumble, 0 ); } )
+      )
+  );
 
-  // joystick.Button(3).OnTrue( frc2::cmd::RunOnce([this]
-  //   { delete cptr;
-  //     cptr = new StatefulCommand( &m_subsystem );
-  //     cptr->Schedule(); 
-  //   } )
-  // ); 
+  m_intake.HasNoteTrigger().OnTrue( NoteViz( &m_drive, &m_subsystem, &m_intake ).ToPtr() );
 
-  // joystick.Button(4).OnTrue( frc2::cmd::RunOnce([this] { timer.Schedule(); } ) ); 
+  controller.A().OnTrue( 
+    frc2::cmd::Sequence( 
+      MoveMechanism( &m_subsystem, -15_deg, -42_deg, 0_in ).ToPtr(),
+      m_intake.IntakeNote(),
+      MoveMechanism( &m_subsystem, 155_deg, 135_deg, 0_in ).ToPtr()
+    )
+  );
 
-  joystick.Button(1).OnTrue( MoveMechanism( &m_subsystem, -15_deg, -42_deg, 0_in ).ToPtr() );
-  joystick.Button(2).OnTrue( MoveMechanism( &m_subsystem, 75_deg, 120_deg, 20_in ).ToPtr() );
-  joystick.Button(3).OnTrue( MoveMechanism( &m_subsystem, 155_deg, 40_deg, 0_in ).ToPtr() );
-  joystick.Button(4).OnTrue( MoveMechanism( &m_subsystem, 155_deg, 135_deg, 0_in ).ToPtr() );
+  controller.Y().OnTrue( MoveMechanism( &m_subsystem, 75_deg, 120_deg, 20_in ).ToPtr() );
+  controller.B().OnTrue( MoveMechanism( &m_subsystem, 155_deg, 40_deg, 0_in ).ToPtr() );
+  controller.X().OnTrue( MoveMechanism( &m_subsystem, 155_deg, 135_deg, 0_in ).ToPtr() );
+
+  (controller.RightTrigger() && m_intake.HasNoteTrigger()).OnTrue( autos::ShootNote( &m_intake, &m_drive ) );
 
   // joystick.Button(1).OnTrue( SeqMoveMech( &m_subsystem, -15_deg, -42_deg ).ToPtr() );
   // joystick.Button(3).OnTrue( SeqMoveMech( &m_subsystem, 155_deg, 40_deg ).ToPtr() );
@@ -87,6 +99,5 @@ frc2::CommandPtr RobotContainer::GetCommand() {
         frc2::WaitCommand( 1_s ).ToPtr(),
         frc2::InstantCommand([timestart] {
         fmt::print( "StateCommand got start time {} and end time of {}\n", timestart, frc::Timer::GetFPGATimestamp() );
-        }, {&m_subsystem} ).ToPtr(),
-        autos::ExampleAuto( &m_subsystem )       
-    );}
+        }, {&m_subsystem} ).ToPtr()
+      );}

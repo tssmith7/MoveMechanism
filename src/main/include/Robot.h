@@ -6,15 +6,14 @@
 
 #include <optional>
 
-#include <frc/TimedRobot.h>
 #include <frc2/command/CommandPtr.h>
-#include <frc/smartdashboard/Field2d.h>
 
+#include "LoggedRobot.h"
 #include "RobotContainer.h"
 
 #include "Constraint.h"
 
-class Robot : public frc::TimedRobot {
+class Robot : public LoggedRobot {
  public:
   Robot();
   void RobotPeriodic() override;
@@ -35,12 +34,8 @@ class Robot : public frc::TimedRobot {
 
   RobotContainer m_container;
 
-  frc::Pose2d robotPose;
-  frc::Pose2d target;
 
-  frc::Field2d field;
+  // void RotateToTarget(  );
 
-  void RotateToTarget(  );
-
-  Constraint<units::degrees, units::degrees> arm_wrist_Cnst;
+  // Constraint<units::degrees, units::degrees> arm_wrist_Cnst;
 };

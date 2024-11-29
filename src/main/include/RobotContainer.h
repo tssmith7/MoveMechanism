@@ -16,6 +16,8 @@
 #include "Constants.h"
 #include "commands/Autos.h"
 #include "subsystems/ExampleSubsystem.h"
+#include "subsystems/Drive.h"
+#include "subsystems/Intake.h"
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -32,20 +34,15 @@ class RobotContainer {
   frc2::CommandPtr GetCommand();
 
  private:
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-
   // The robot's subsystems are defined here...
   ExampleSubsystem m_subsystem;
+  Drive m_drive;
+  Intake m_intake;
 
-  frc2::CommandJoystick joystick{0};
+  frc2::CommandXboxController controller{0};
 
   void ConfigureBindings();
-  frc2::Command *cptr{nullptr};
 
-  TimerCommand timer{&m_subsystem};
-  std::unique_ptr<frc2::Command> cmdptr;
-
-  DelayedStop dstop;
 
   frc::SendableChooser<std::string> m_chooser;
 

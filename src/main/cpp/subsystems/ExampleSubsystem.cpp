@@ -25,10 +25,10 @@ void ExampleSubsystem::Periodic() {
 
   inputs.ProcessInputs( "Example" );
 
-  m_elevator->SetLength( inputs.elevPosition.value() );
-  m_arm->SetAngle( inputs.armPosition - 90_deg );
-  m_wrist->SetAngle( inputs.wristPosition - inputs.armPosition );
-  m_xbarRoot->SetPosition( 15, 22 + inputs.elevPosition.value() / 2 );
+  m_elevator->SetLength( inputs.elevPosition.value()/39.0 );
+  m_arm->SetAngle( 90_deg - inputs.armPosition );
+  m_wrist->SetAngle( inputs.armPosition - inputs.wristPosition);
+  m_xbarRoot->SetPosition( 15/39.0, (22 + inputs.elevPosition.value() / 2)/39.0 );
 }
 
 frc2::CommandPtr ExampleSubsystem::MoveToAngles( units::degree_t arm, units::degree_t wrist)
@@ -54,8 +54,6 @@ frc2::CommandPtr ExampleSubsystem::MoveToHeight( units::meter_t height)
 
 void ExampleSubsysInputs::ProcessInputs( std::string key ) {
   AUTOLOG(key,armPosition)
-  AUTOLOG(key,armPositionHistory)
-  AUTOLOG(key,armPositionHistoryDbl)
   AUTOLOG(key,armGoal)
   AUTOLOG(key,armVelocity)
   AUTOLOG(key,armAppliedVolts)
@@ -72,4 +70,12 @@ void ExampleSubsysInputs::ProcessInputs( std::string key ) {
   AUTOLOG(key,elevVelocity)
   AUTOLOG(key,elevAppliedVolts)
   AUTOLOG(key,elevCurrent)
+
+  AUTOLOG(key,armPositionHistory)
+  AUTOLOG(key,armPositionHistoryDbl)
+  AUTOLOG(key,armSetpoint)
+  AUTOLOG(key,visionPose)
+  AUTOLOG(key,int64vec)
+  AUTOLOG(key,has10selasped)
+  AUTOLOG(key,oneSecInc)
 }

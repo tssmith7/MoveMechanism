@@ -27,6 +27,7 @@ private:
 };
 
 void ExampleIOSim::UpdateInputs( ExampleSubsysInputs &inputs ) {
+    static units::second_t nextTime = 10_s;
     m_armMotor.Update();
     m_wristMotor.Update();
     m_elevMotor.Update();
@@ -36,13 +37,26 @@ void ExampleIOSim::UpdateInputs( ExampleSubsysInputs &inputs ) {
     inputs.armPositionHistory[1] = inputs.armPosition;
     inputs.armPositionHistory[0] = inp_deg.position;
 
+
     if( frc::Timer::GetFPGATimestamp() > 10_s ) {
+        if( frc::Timer::GetFPGATimestamp() > nextTime ) {
+            nextTime += 1_s;
+            for(int i=9; i>0; --i ) {
+                inputs.oneSecInc[i] = inputs.oneSecInc[i-1];
+            }
+            inputs.oneSecInc[0] = true;
+        }
         inputs.armPositionHistoryDbl = {};
+        inputs.visionPose.reset();
+        inputs.armSetpoint.reset();
+        inputs.has10selasped = true;
     } else {
         inputs.armPositionHistoryDbl[1] = inputs.armPosition.value();
         inputs.armPositionHistoryDbl[0] = inp_deg.position.value();
+        inputs.visionPose = { 1_m, 2_m + (inputs.armPositionHistoryDbl[1]-inputs.armPositionHistoryDbl[0])*1_m, 0_deg };
+        inputs.armSetpoint = inputs.armPositionHistory[0];
     }
-    
+ 
     inputs.armPosition = inp_deg.position;
     inputs.armVelocity = inp_deg.velocity;
     inputs.armAppliedVolts = inp_deg.inputVoltage;
